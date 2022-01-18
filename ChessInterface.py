@@ -6,14 +6,18 @@ import pytesseract
 from matplotlib import pyplot as plt
 from operator import itemgetter
 from BoardDefiner import BoardDefiner
+from ChessBoard import ChessBoard
 from ChessBoardAuto import ChessBoardAuto
 from agent2 import Agent2
 
+from getkeys import key_check
 
-def main():
+
+def playGame():
     while(True):
+        quitLooping = False
         endGameByNew10MinRated = False
-        board = ChessBoardAuto()
+        board = ChessBoard()
         chessSiteBoard = BoardDefiner()
         agent = Agent2()
 
@@ -21,66 +25,95 @@ def main():
         chessSiteBoard.findBoardBorders()
         chessSiteBoard.findBoardDimensions()
         chessSiteBoard.splitBoardIntoGrid()
-        # board.moveMouseIntoGridCoords()
         side = chessSiteBoard.determineSide()
         board.currBoard = chessSiteBoard.findPieces()
         gameOver = False
 
         # '''
         if side == 0:
+            # new game - clear old stuff, reset values
             print("Playing as White")
             currMove = 0
             chessSiteBoard.resetAfterMoveScreenshot()
             board.currBoard = chessSiteBoard.findPieces()
-            board.currPlayerMove = 0
             side = 0
             board.printBoard()
             while not gameOver:
-                # break
+                # if white move
                 if currMove == side:
-                    moveList = board.getAllPossibleMoves()
-                    if moveList == -1 or len(moveList) == 0:
+
+                    # get all moves
+                    moveList = board.getAllMoves()
+
+                    # if no moves then GG
+                    if len(moveList) == 0:
                         print("Good Game, black won")
                         board.printBoard()
                         break
                     else:
-                        moveIndex = agent.pickMove(moveList)
-                        move = moveList[moveIndex]
-                        movePieceLoc = move[1][0]
-                        movePieceToLoc = move[1][1]
-                        board.move(movePieceLoc[0], movePieceLoc[1],
-                                   movePieceToLoc[0], movePieceToLoc[1])
+                        # look for valid move
+                        while(True):
+                            print()
+                            moveIndex = agent.pickMove(moveList)
+                            move = moveList[moveIndex]
+                            movePieceLoc = move[1][0]
+                            movePieceToLoc = move[1][1]
+                            moveReturnCode = board.move(
+                                movePieceLoc[0], movePieceLoc[1], movePieceToLoc[0], movePieceToLoc[1])
+                            # if not valid move remove it from list and loop again
+                            if moveReturnCode == -1:
+                                moveList.remove(move)
+                            # if valid move - move piece on site then check if pawn promotion occurred
+                            else:
+                                chessSiteBoard.movePiece(
+                                    movePieceLoc, movePieceToLoc)
 
-                        chessSiteBoard.movePiece(movePieceLoc, movePieceToLoc)
-                        # handle pawn promotion
-                        if movePieceToLoc[0] == 0 and board.currBoard[movePieceToLoc[0]][movePieceToLoc[1]] == 1:
-                            pyautogui.sleep(1)
-                            print("Promoting Pawn")
-                            chessSiteBoard.movePiece(
-                                movePieceToLoc, movePieceToLoc)
+                                # handle pawn promotion
+                                if moveReturnCode == 2:
+                                    pyautogui.sleep(1)
+                                    print("Promoting Pawn")
+                                    chessSiteBoard.movePiece(
+                                        movePieceToLoc, movePieceToLoc)
+                                break
 
+                # if black move
                 else:
+
+                    # busy loop until black moves
                     diff = 0
                     while diff == 0:
+                        # calc diff from current state and previous after move photo
                         diff = chessSiteBoard.findDifferences()
+
+                        # if resignation or user won and new game pops up then end busy loop
                         if chessSiteBoard.findNew10MinRatedChat() == 1:
-                            endGameByNew10MinRated = True
                             print("Stopped by detecting - can create new game")
-                            break
+                            keys = key_check()
+                            if keys == "H":
+                                quitLooping = True
+                                break
+                            else:
+                                print("Creating New Game")
+                                chessSiteBoard.clickMouse()
+                                endGameByNew10MinRated = True
+                                break
+
                         pyautogui.sleep(1)
 
+                    # if resignation or user won and new game pops up then end busy loop
                     if endGameByNew10MinRated:
                         break
 
+                    # set board to after black moved
                     board.currBoard = chessSiteBoard.findPieces()
-                    board.currPlayerMove = 0
                     pyautogui.sleep(1)
 
-                    if chessSiteBoard.checkGameOver() == 1:
-                        print("Stopped by image recognition")
-                        print("Good Game, black won")
-                        board.printBoard()
-                        break
+                    # stop game if game over sign indicating user lost appears
+                    # if chessSiteBoard.checkGameOver() == 1:
+                    #    print("Stopped by image recognition")
+                    #    print("Good Game, black won")
+                    #    board.printBoard()
+                    #    break
 
                 currMove = (currMove + 1) % 2
         else:
@@ -96,41 +129,58 @@ def main():
                     pyautogui.sleep(1)
 
             board.currBoard = list(np.array(chessSiteBoard.findPieces()) * -1)
-            board.currPlayerMove = 0
             side = 0
             board.printBoard()
             while not gameOver:
                 # break
                 if currMove == side:
-                    moveList = board.getAllPossibleMoves()
-                    if moveList == -1 or len(moveList) == 0:
+                    moveList = board.getAllMoves()
+                    if len(moveList) == 0:
                         print("Good Game, white won")
                         board.printBoard()
                         break
                     else:
-                        moveIndex = agent.pickMove(moveList)
-                        move = moveList[moveIndex]
-                        movePieceLoc = move[1][0]
-                        movePieceToLoc = move[1][1]
-                        board.move(movePieceLoc[0], movePieceLoc[1],
-                                   movePieceToLoc[0], movePieceToLoc[1])
+                        # look for valid move
+                        while(True):
+                            print()
+                            moveIndex = agent.pickMove(moveList)
+                            move = moveList[moveIndex]
+                            movePieceLoc = move[1][0]
+                            movePieceToLoc = move[1][1]
+                            moveReturnCode = board.move(
+                                movePieceLoc[0], movePieceLoc[1], movePieceToLoc[0], movePieceToLoc[1])
+                            # if not valid move remove it from list and loop again
+                            if moveReturnCode == -1:
+                                moveList.remove(move)
+                            # if valid move - move piece on site then check if pawn promotion occurred
+                            else:
+                                chessSiteBoard.movePiece(
+                                    movePieceLoc, movePieceToLoc)
 
-                        chessSiteBoard.movePiece(movePieceLoc, movePieceToLoc)
-                        # handle pawn promotion
-                        if movePieceToLoc[0] == 0 and board.currBoard[movePieceToLoc[0]][movePieceToLoc[1]] == 1:
-                            pyautogui.sleep(1)
-                            print("Promoting Pawn")
-                            chessSiteBoard.movePiece(
-                                movePieceToLoc, movePieceToLoc)
+                                # handle pawn promotion
+                                if moveReturnCode == 2:
+                                    pyautogui.sleep(1)
+                                    print("Promoting Pawn")
+                                    chessSiteBoard.movePiece(
+                                        movePieceToLoc, movePieceToLoc)
+                                break
 
                 else:
                     diff = 0
                     while diff == 0:
                         diff = chessSiteBoard.findDifferences()
+
                         if chessSiteBoard.findNew10MinRatedChat() == 1:
-                            endGameByNew10MinRated = True
                             print("Stopped by detecting - can create new game")
-                            break
+                            keys = key_check()
+                            if keys == "H":
+                                quitLooping = True
+                                break
+                            else:
+                                print("Creating New Game")
+                                chessSiteBoard.clickMouse()
+                                endGameByNew10MinRated = True
+                                break
                         pyautogui.sleep(1)
 
                     if endGameByNew10MinRated:
@@ -138,16 +188,19 @@ def main():
 
                     board.currBoard = list(
                         np.array(chessSiteBoard.findPieces()) * -1)
-                    board.currPlayerMove = 0
                     pyautogui.sleep(1)
 
-                    if chessSiteBoard.checkGameOver() == 1:
-                        print("Stopped by image recognition")
-                        print("Good Game, white won")
-                        board.printBoard()
-                        break
+                    # if chessSiteBoard.checkGameOver() == 1:
+                    #    print("Stopped by image recognition")
+                    #    print("Good Game, white won")
+                    #    board.printBoard()
+                    #    break
 
                 currMove = (currMove + 1) % 2
+
+        keys = key_check()
+        if keys == "H" or quitLooping:
+            break
 
         if chessSiteBoard.findNew10MinGameBoard() == -1:
             if chessSiteBoard.findNew10MinRatedChat() == -1:
@@ -157,8 +210,31 @@ def main():
                     print("Can't Find New Game, Stopping Execution")
                     break
         pyautogui.sleep(10)
-    # '''
+
+
+def testBoard():
+    agent = Agent2()
+    board = ChessBoard()
+
+    board.SetSide(3)
+    board.printBoard()
+    moveList = board.getAllMoves()
+
+    while(True):
+        print()
+        moveIndex = agent.pickMove(moveList)
+        move = moveList[moveIndex]
+        movePieceLoc = move[1][0]
+        movePieceToLoc = move[1][1]
+        if board.move(movePieceLoc[0], movePieceLoc[1], movePieceToLoc[0], movePieceToLoc[1]) == -1:
+            moveList.remove(move)
+        else:
+            break
+        # board.printBoard()
+
+    board.printBoard()
 
 
 if __name__ == "__main__":
-    main()
+    playGame()
+    # testBoard()

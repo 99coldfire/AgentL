@@ -67,8 +67,11 @@ class BoardDefiner:
             return -1
         else:
             pyautogui.moveTo(MPx + h/2, MPy + w/2)
-            pyautogui.click()
+            # pyautogui.click()
             return 1
+
+    def clickMouse(self):
+        pyautogui.click()
 
     def findNew10MinGameBoard(self):
         img = pyautogui.screenshot()
@@ -311,10 +314,10 @@ class BoardDefiner:
         print(MPx, ":", MPy)
 
         # Display the original image with the rectangle around the match.
-        cv.imshow('output', img)
+        #cv.imshow('output', img)
 
         # The image is only displayed if we call this
-        cv.waitKey(0)
+        # cv.waitKey(0)
 
         if MPx == -1:
             return -1
