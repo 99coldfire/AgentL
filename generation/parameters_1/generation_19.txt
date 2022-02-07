@@ -1,0 +1,2 @@
+Generation 19 best agent parameters:
+pieceValueScoreWeight:-6

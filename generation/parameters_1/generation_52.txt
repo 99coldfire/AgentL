@@ -1,0 +1,2 @@
+Generation 52 best agent parameters:
+pieceValueScoreWeight:-97

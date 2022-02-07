@@ -11,7 +11,7 @@ class ChessBoard:
     whiteBoard = [[-2, -3, -4, -5, -6, -4, -3, -2],
                   [-1, -1, -1, -1, -1, -1, -1, -1],
                   [0, 0, 0, 0, 0, 0, 0, 0],
-                  [0, 0, 0, 0, 6, 0, 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0],
                   [1, 1, 1, 1, 1, 1, 1, 1],
@@ -33,7 +33,7 @@ class ChessBoard:
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 0]]
+                    [0, 0, 0, 5, 0, 0, 0, 0]]
 
     pieceDict = {
         1: "pawn",
@@ -44,13 +44,29 @@ class ChessBoard:
         6: "king"
     }
 
+    def InvertBoard(self):
+        invertedBoard = [[0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0, 0]]
+        for row in range(8):
+            for col in range(8):
+                invertedRow = 4 + 3 - row
+                invertedCol = 4 + 3 - col
+                invertedBoard[invertedRow][invertedCol] = self.currBoard[row][col] * -1
+        self.currBoard = invertedBoard
+
     def SetSide(self, side):
         if side == 1:
-            self.currBoard = self.whiteBoard
+            self.currBoard = copy.deepcopy(self.whiteBoard)
         elif side == 2:
-            self.currBoard = self.blackBoard
+            self.currBoard = copy.deepcopy(self.blackBoard)
         else:
-            self.currBoard = self.testingBoard
+            self.currBoard = copy.deepcopy(self.testingBoard)
 
     def move(self, row1, col1, row2, col2):
         currBoardCopy = copy.deepcopy(self.currBoard)
@@ -60,35 +76,39 @@ class ChessBoard:
         # check if move does not put king in check
         kingLoc = self.getKingLoc()
         if self.checkLocForCheck(kingLoc[0], kingLoc[1])[0]:
-            print("Move puts king in check")
+            #print("Move puts king in check")
             self.currBoard = currBoardCopy
             return -1
 
         if self.currBoard[row2][col2] == 1 and row2 == 0:
-            print("Promoting Pawn to Queen")
+            #print("Promoting Pawn to Queen")
             self.currBoard[row2][col2] = 5
             return 2
         return 1
 
-    def getAllMoves(self):
+    def getAllMoves(self, verbose):
         moveList = self.getMoves()
         kingLoc = self.getKingLoc()
-        check, checkingPieceLoc = self.checkLocForCheck(kingLoc[0], kingLoc[1])
-        print("\nKing at ", kingLoc[0], ":",
-              kingLoc[1], ", Check: ", check)
-        if check:
-            print("Checking Piece Loc at: ", checkingPieceLoc)
+        check, checkingPieceLoc = self.checkLocForCheck(
+            kingLoc[0], kingLoc[1])
+
+        if verbose:
+            print("\nKing at ", kingLoc[0], ":",
+                  kingLoc[1], ", Check: ", check)
+            if check:
+                print("Checking Piece Loc at: ", checkingPieceLoc)
 
         pathToChecker = self.getPathFromCheckerToKing(
-            checkingPieceLoc, kingLoc)
+            checkingPieceLoc, kingLoc, verbose)
 
         if check:
             moveList = self.kingCheckMoves(moveList, pathToChecker)
 
-        self.printMoveList(moveList)
+        if verbose:
+            self.printMoveList(moveList)
         return moveList
 
-    def getPathFromCheckerToKing(self, checkingPieceLoc, kingLoc):
+    def getPathFromCheckerToKing(self, checkingPieceLoc, kingLoc, verbose):
         pathToChecker = []
         if checkingPieceLoc[0] != -1 or checkingPieceLoc[1] != -1:
             pathToChecker.append(checkingPieceLoc)
@@ -114,8 +134,9 @@ class ChessBoard:
                     pathToChecker.append(
                         (kingLoc[0], int(kingLoc[1] + i * colPosNeg)))
 
-        print("\nPath to Checker Loc")
-        print(pathToChecker)
+        if verbose:
+            print("\nPath to Checker Loc")
+            print(pathToChecker)
         return pathToChecker
 
     def kingCheckMoves(self, moveList, pathToChecker):
@@ -542,12 +563,12 @@ class ChessBoard:
             moves += str(row - 1) + ',' + str(col - 1) + "; "
         return moves
 
-    def printBoard(self):
+    def printBoard(self, board):
         print()
         print("        0    1    2    3     4    5    6    7      Col ")
         print("      -----------------------------------------")
         count = 0
-        for col in self.currBoard:
+        for col in board:
             print(" ", str(count), "  |", end='')
             for row in col:
                 if row >= 0:

@@ -1,0 +1,2 @@
+Generation 50 best agent parameters:
+pieceValueScoreWeight:-50

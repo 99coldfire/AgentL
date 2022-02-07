@@ -1,0 +1,2 @@
+Generation 35 best agent parameters:
+pieceValueScoreWeight:-9

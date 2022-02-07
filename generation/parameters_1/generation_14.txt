@@ -1,0 +1,2 @@
+Generation 14 best agent parameters:
+pieceValueScoreWeight:-8

@@ -1,0 +1,2 @@
+Generation 63 best agent parameters:
+pieceValueScoreWeight:-4

@@ -1,0 +1,2 @@
+Generation 94 best agent parameters:
+pieceValueScoreWeight:86

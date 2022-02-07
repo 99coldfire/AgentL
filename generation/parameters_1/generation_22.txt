@@ -1,0 +1,2 @@
+Generation 22 best agent parameters:
+pieceValueScoreWeight:-11

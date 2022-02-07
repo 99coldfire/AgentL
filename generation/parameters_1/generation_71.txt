@@ -1,0 +1,2 @@
+Generation 71 best agent parameters:
+pieceValueScoreWeight:-16

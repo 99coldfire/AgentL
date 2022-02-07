@@ -21,8 +21,8 @@ class BoardDefiner:
         'bot': (0, 0),
     }
 
-    borders = ['BottomBorder.png', 'RightBorder.png',
-               'LeftBorder.png', 'TopBorder.png']
+    borders = ['./images/BottomBorder.png', './images/RightBorder.png',
+               './images/LeftBorder.png', './images/TopBorder.png']
 
     methods = ['cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
                'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']
@@ -50,7 +50,7 @@ class BoardDefiner:
         img = pyautogui.screenshot()
         img = cv.cvtColor(np.array(img),
                           cv.COLOR_RGB2BGR)
-        template = cv.imread("New10MinRatedChat.png")
+        template = cv.imread("./images/New10MinRatedChat.png")
         result = cv.matchTemplate(img, template, cv.TM_CCOEFF_NORMED)
 
         MPx = -1
@@ -77,7 +77,7 @@ class BoardDefiner:
         img = pyautogui.screenshot()
         img = cv.cvtColor(np.array(img),
                           cv.COLOR_RGB2BGR)
-        template = cv.imread("New10MinBoard.png")
+        template = cv.imread("./images/New10MinBoard.png")
         result = cv.matchTemplate(img, template, cv.TM_CCOEFF_NORMED)
 
         MPx = -1
@@ -111,14 +111,14 @@ class BoardDefiner:
             self.boardTopLeftCorner[0], self.boardTopLeftCorner[1], self.boardLengthHeight[0], self.boardLengthHeight[1]))
         img_rgb = cv.cvtColor(np.array(img_rgb),
                               cv.COLOR_RGB2BGR)
-        cv.imwrite("board.png", img_rgb)
+        cv.imwrite("./images/board.png", img_rgb)
 
         pieces = ["Pawn", "Rook", "Knight", "Bishop", "Queen", "King"]
         sides = ["Black", "White"]
         boxSize = self.boardLengthHeight[0]/8
         for side in sides:
             for piece in pieces:
-                template = cv.imread(side + piece + ".png")
+                template = cv.imread("./images/" + side + piece + ".png")
 
                 w, h = template.shape[:-1]
 
@@ -182,7 +182,7 @@ class BoardDefiner:
         image = pyautogui.screenshot()
         image = cv.cvtColor(np.array(image),
                             cv.COLOR_RGB2BGR)
-        cv.imwrite("chessImage.png", image)
+        cv.imwrite("./images/chessImage.png", image)
 
     def takeScreenshotOfBoard(self, imageName):
         image = pyautogui.screenshot(region=(
@@ -210,23 +210,23 @@ class BoardDefiner:
             self.boardTopLeftCorner[0], self.boardTopLeftCorner[1], self.boardLengthHeight[0], self.boardLengthHeight[1]))
         img = cv.cvtColor(np.array(img),
                           cv.COLOR_RGB2BGR)
-        cv.imwrite("afterMoveScreenshot.png", img)
+        cv.imwrite("./images/afterMoveScreenshot.png", img)
 
     def findDifferences(self):
-        before = cv.imread('afterMoveScreenshot.png')
+        before = cv.imread('./images/afterMoveScreenshot.png')
 
         after = pyautogui.screenshot(region=(
             self.boardTopLeftCorner[0], self.boardTopLeftCorner[1], self.boardLengthHeight[0], self.boardLengthHeight[1]))
         after = cv.cvtColor(np.array(after),
                             cv.COLOR_RGB2BGR)
-        cv.imwrite("comparingImage.png", after)
+        cv.imwrite("./images/comparingImage.png", after)
 
         # Convert images to grayscale
         before_gray = cv.cvtColor(before, cv.COLOR_BGR2GRAY)
         after_gray = cv.cvtColor(after, cv.COLOR_BGR2GRAY)
 
         before_gray = self.to_grayscale(
-            cv.imread('afterMoveScreenshot.png').astype(float))
+            cv.imread('./images/afterMoveScreenshot.png').astype(float))
         after_gray = self.to_grayscale(after.astype(float))
 
         n_m, n_0 = self.compare_images(before_gray, after_gray)
@@ -237,7 +237,7 @@ class BoardDefiner:
 
     def findDiffMove(self):
         # load images
-        before = cv.imread("afterMoveScreenshot.png")
+        before = cv.imread("./images/afterMoveScreenshot.png")
 
         moveList = []
 
@@ -246,7 +246,7 @@ class BoardDefiner:
             self.boardTopLeftCorner[0], self.boardTopLeftCorner[1], self.boardLengthHeight[0], self.boardLengthHeight[1]))
         after = cv.cvtColor(np.array(after),
                             cv.COLOR_RGB2BGR)
-        cv.imwrite("comparingImage.png", after)
+        cv.imwrite("./images/comparingImage.png", after)
 
         # Convert images to grayscale
         before_gray = cv.cvtColor(before, cv.COLOR_BGR2GRAY)
@@ -288,7 +288,7 @@ class BoardDefiner:
         print("Move: ")
         print(moveList)
 
-        cv.imwrite("after.png", after)
+        cv.imwrite("./images/after.png", after)
 
         return moveList
 
@@ -296,7 +296,7 @@ class BoardDefiner:
         img = pyautogui.screenshot()
         img = cv.cvtColor(np.array(img),
                           cv.COLOR_RGB2BGR)
-        template = cv.imread("GameOverSign.png")
+        template = cv.imread("./images/GameOverSign.png")
         result = cv.matchTemplate(img, template, cv.TM_CCOEFF_NORMED)
 
         MPx = -1
@@ -325,7 +325,7 @@ class BoardDefiner:
             return 1
 
     def findBoardBorders(self):
-        img = cv.imread('chessImage.png')
+        img = cv.imread('./images/chessImage.png')
 
         for border in self.borders:
             print()
@@ -345,16 +345,16 @@ class BoardDefiner:
             trows, tcols = template.shape[:2]
 
             loc = ''
-            if border == 'BottomBorder.png':
+            if border == './images/BottomBorder.png':
                 print("Bottom Y:", MPy+(trows/2))
                 loc = 'bot'
-            if border == 'TopBorder.png':
+            if border == './images/TopBorder.png':
                 print("Top Y:", MPy+(trows/2))
                 loc = 'top'
-            if border == 'LeftBorder.png':
+            if border == './images/LeftBorder.png':
                 print("Left X:", MPx+(tcols/2))
                 loc = 'left'
-            if border == 'RightBorder.png':
+            if border == './images/RightBorder.png':
                 print("Right X:", MPx+(tcols/2))
                 loc = 'right'
 
@@ -372,7 +372,7 @@ class BoardDefiner:
             '''
 
     def findBoardDimensions(self):
-        img = cv.imread('chessImage.png')
+        img = cv.imread('./images/chessImage.png')
 
         length = self.coordsOfRedRect['right'][0] - \
             self.coordsOfRedRect['left'][0]
@@ -423,7 +423,7 @@ class BoardDefiner:
     '''
 
     def splitBoardIntoGrid(self):
-        img = cv.imread('chessImage.png')
+        img = cv.imread('./images/chessImage.png')
         boxSize = self.boardLengthHeight[0]/8
 
         x, y = self.boardTopLeftCorner
@@ -454,9 +454,9 @@ class BoardDefiner:
             pyautogui.sleep(0.5)
 
     def determineSide(self):
-        img = cv.imread('chessImage.png')
+        img = cv.imread('./images/chessImage.png')
         method = eval(self.methods[4])
-        template = cv.imread('WhitePawn.png')
+        template = cv.imread('./images/WhitePawn.png')
         result = cv.matchTemplate(template, img, method)
 
         mn, _, mnLoc, _ = cv.minMaxLoc(result)
@@ -478,5 +478,5 @@ class BoardDefiner:
         pyautogui.moveTo(coord[0], coord[1])
         coord = self.gridCoords[newLoc]
         pyautogui.dragTo(coord[0], coord[1], button='left')
-        self.takeScreenshotOfBoard("afterMoveScreenshot.png")
+        self.takeScreenshotOfBoard("./images/afterMoveScreenshot.png")
         pyautogui.sleep(1)

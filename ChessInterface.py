@@ -1,19 +1,27 @@
-from re import T
+import copy
+from email.mime import base
+from random import random
+from time import time
 import numpy as np
-import cv2 as cv
 import pyautogui
-import pytesseract
 from matplotlib import pyplot as plt
-from operator import itemgetter
+
 from BoardDefiner import BoardDefiner
 from ChessBoard import ChessBoard
-from ChessBoardAuto import ChessBoardAuto
+from Util import playBO5, readGenerationFile, writeToGenerationFile
 from agent2 import Agent2
 
 from getkeys import key_check
 
 
-def playGame():
+def playGameOnChessDotCom():
+    while True:
+        keys = key_check()
+        print("waiting press B to start")
+        if keys == "B":
+            print("Starting")
+            break
+
     while(True):
         quitLooping = False
         endGameByNew10MinRated = False
@@ -37,24 +45,25 @@ def playGame():
             chessSiteBoard.resetAfterMoveScreenshot()
             board.currBoard = chessSiteBoard.findPieces()
             side = 0
-            board.printBoard()
+            board.printBoard(board.currBoard)
             while not gameOver:
                 # if white move
                 if currMove == side:
 
                     # get all moves
-                    moveList = board.getAllMoves()
+                    moveList = board.getAllMoves(True)
 
                     # if no moves then GG
                     if len(moveList) == 0:
                         print("Good Game, black won")
-                        board.printBoard()
+                        board.printBoard(board.currBoard)
                         break
                     else:
                         # look for valid move
                         while(True):
                             print()
-                            moveIndex = agent.pickMove(moveList)
+                            moveIndex = agent.pickMove(
+                                moveList, True, board.currBoard)
                             move = moveList[moveIndex]
                             movePieceLoc = move[1][0]
                             movePieceToLoc = move[1][1]
@@ -130,14 +139,14 @@ def playGame():
 
             board.currBoard = list(np.array(chessSiteBoard.findPieces()) * -1)
             side = 0
-            board.printBoard()
+            board.printBoard(board.currBoard)
             while not gameOver:
                 # break
                 if currMove == side:
                     moveList = board.getAllMoves()
                     if len(moveList) == 0:
                         print("Good Game, white won")
-                        board.printBoard()
+                        board.printBoard(board.currBoard)
                         break
                     else:
                         # look for valid move
@@ -190,12 +199,6 @@ def playGame():
                         np.array(chessSiteBoard.findPieces()) * -1)
                     pyautogui.sleep(1)
 
-                    # if chessSiteBoard.checkGameOver() == 1:
-                    #    print("Stopped by image recognition")
-                    #    print("Good Game, white won")
-                    #    board.printBoard()
-                    #    break
-
                 currMove = (currMove + 1) % 2
 
         keys = key_check()
@@ -212,29 +215,93 @@ def playGame():
         pyautogui.sleep(10)
 
 
+def createBaseGenerationFile(agent, generation):
+
+    writeToGenerationFile(agent.returnWeightScores(), generation)
+
+
+def runOneGeneration(generation):
+    sampleAgent = Agent2(0, 0, 0)
+    if generation == 1:
+        createBaseGenerationFile(sampleAgent, generation - 1)
+
+    baseParameters = readGenerationFile(
+        generation - 1, len(sampleAgent.returnWeightScores()))
+
+    mutationsInPop = int(random() * 10)
+    # print("Mutations: " + str(mutationsInPop))
+    numAgentsInGeneration = 64
+    agentList = []
+    mutationsCreated = 0
+    baseAgent = 0
+    for a in range(numAgentsInGeneration):
+        if baseAgent == 0:
+            # print("Creating Base")
+            baseAgent = baseAgent + 1
+            newAgent = Agent2(copy.deepcopy(baseParameters))
+            agentList.append(copy.deepcopy(newAgent))
+        elif mutationsCreated != mutationsInPop:
+            # print("Creating Mutation")
+            mutationsCreated = mutationsCreated + 1
+            newAgent = Agent2(copy.deepcopy(baseParameters), True)
+            agentList.append(copy.deepcopy(newAgent))
+        else:
+            # print("Creating Normal Pop")
+            newAgent = Agent2(copy.deepcopy(baseParameters), False)
+            agentList.append(copy.deepcopy(newAgent))
+
+    '''
+    with open('./generation/' + 'parameters_' + str(len(sampleAgent.returnWeightScores())) + '/' + 'generationAgents_' + str(generation) + '.txt', 'w') as file:
+        count = 0
+        for agent in agentList:
+            count = count + 1
+            file.write(str(count) + ') ' + str(agent))
+            file.write(':\n')
+            for item in agent.returnWeightScores().items():
+                file.write(item[0] + ':' + str(item[1]) + '\n')
+    # '''
+
+    playTournament(agentList, generation)
+
+
+def playTournament(agentList, generation):
+    newRound = []
+
+    while(len(newRound) != 1):
+        newRound.clear()
+        numContestants = len(agentList)
+        print(str(numContestants) + " Contestants")
+        for i in range(int(numContestants/2)):
+            winner = playBO5(agentList[i], agentList[numContestants - 1 - i])
+            newRound.append(winner)
+        agentList = copy.deepcopy(newRound)
+    print("Tournament Winner: " + str(newRound[0]))
+
+    winnerParameters = newRound[0].returnWeightScores()
+    writeToGenerationFile(winnerParameters, generation)
+
+
 def testBoard():
     agent = Agent2()
     board = ChessBoard()
 
     board.SetSide(3)
-    board.printBoard()
-    moveList = board.getAllMoves()
-
-    while(True):
-        print()
-        moveIndex = agent.pickMove(moveList)
-        move = moveList[moveIndex]
-        movePieceLoc = move[1][0]
-        movePieceToLoc = move[1][1]
-        if board.move(movePieceLoc[0], movePieceLoc[1], movePieceToLoc[0], movePieceToLoc[1]) == -1:
-            moveList.remove(move)
-        else:
-            break
-        # board.printBoard()
-
-    board.printBoard()
+    board.printBoard(board.currBoard)
+    board.InvertBoard()
+    board.printBoard(board.currBoard)
+    board.InvertBoard()
+    board.printBoard(board.currBoard)
 
 
 if __name__ == "__main__":
-    playGame()
+    # playGame()
     # testBoard()
+    begin = time()
+
+    for generation in range(1, 101):
+        runOneGeneration(generation)
+
+    elapsed = time() - begin
+    print("Total Runtime for 100 generations is " + str(elapsed))
+    # break
+    # playBO5()
