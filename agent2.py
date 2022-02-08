@@ -13,7 +13,7 @@ class Agent2:
 
     parameters = {
         'pieceValueScoreWeight': 0,
-        # 'destLocScoreWeight': 0
+        'destLocScoreWeight': 0
     }
 
     def calcMoveScore(self, move, board):
@@ -21,9 +21,9 @@ class Agent2:
         score = score + \
             self.parameters['pieceValueScoreWeight'] * \
             self.pieceValueScore(move)
-        # score = score + \
-        #    self.parameters['destLocScoreWeight'] * \
-        #    self.destLocScore(move, board)
+        score = score + \
+            self.parameters['destLocScoreWeight'] * \
+            self.destLocScore(move, board)
         return score
 
     def __init__(self, *args):
@@ -57,11 +57,19 @@ class Agent2:
     def destLocScore(self, move, board):
         return abs(board[move[1][1][0]][move[1][1][1]])
 
-    def hozMiddleScore():
-        print()
+    def posAttackingNegSafeScore(self, move):
+        moveRowDest = move[1][1][0]
+        if moveRowDest <= 3:
+            return 3 - moveRowDest
+        if moveRowDest >= 4:
+            return 4 - moveRowDest
 
-    def vertMiddleScore():
-        print()
+    def posLeftNegRightScore(self, move):
+        moveColDest = move[1][1][1]
+        if moveColDest <= 3:
+            return 3 - moveColDest
+        if moveColDest >= 4:
+            return 4 - moveColDest
 
     def pickMove(self, moveList, verbose, board):
         maxScore = -99999

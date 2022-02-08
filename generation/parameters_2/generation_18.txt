@@ -1,0 +1,3 @@
+Generation 18 best agent parameters:
+pieceValueScoreWeight:-90
+destLocScoreWeight:11

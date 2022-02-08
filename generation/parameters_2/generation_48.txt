@@ -1,0 +1,3 @@
+Generation 48 best agent parameters:
+pieceValueScoreWeight:-88
+destLocScoreWeight:-81

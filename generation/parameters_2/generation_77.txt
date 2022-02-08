@@ -1,0 +1,3 @@
+Generation 77 best agent parameters:
+pieceValueScoreWeight:16
+destLocScoreWeight:-31

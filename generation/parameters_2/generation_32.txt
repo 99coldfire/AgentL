@@ -1,0 +1,3 @@
+Generation 32 best agent parameters:
+pieceValueScoreWeight:-84
+destLocScoreWeight:8

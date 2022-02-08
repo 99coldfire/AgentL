@@ -1,0 +1,3 @@
+Generation 5 best agent parameters:
+pieceValueScoreWeight:-87
+destLocScoreWeight:3

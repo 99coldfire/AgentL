@@ -1,0 +1,3 @@
+Generation 4 best agent parameters:
+pieceValueScoreWeight:-91
+destLocScoreWeight:6

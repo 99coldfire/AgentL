@@ -1,0 +1,3 @@
+Generation 87 best agent parameters:
+pieceValueScoreWeight:13
+destLocScoreWeight:-99

@@ -1,0 +1,3 @@
+Generation 81 best agent parameters:
+pieceValueScoreWeight:18
+destLocScoreWeight:-91
